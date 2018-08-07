@@ -26,12 +26,14 @@ pipeline {
                                     // execute the unit testing and collect the reports
                                     junit '**//*target/surefire-reports/TEST-*.xml'
                                     archiveArtifacts 'target*//*.jar'
+                                    build 'GaugeAutomation'
                                 } else {
                                     bat(/"${mvnHome}\bin\mvn" -Dintegration-tests.skip=true clean package/)
                                     def pom = readMavenPom file: 'pom.xml'
                                     print pom.version
                                     junit '**//*target/surefire-reports/TEST-*.xml'
                                     archive 'target*//*.jar'
+                                    build 'GaugeAutomation'
                                 }
                             }
                         },
@@ -122,4 +124,17 @@ def getReleaseVersion() {
         versionNumber = gitCommit.take(8)
     }
     return pom.version.replace("-SNAPSHOT", ".${versionNumber}")
+}
+
+
+def runBuild () {
+    build: {
+        sh "echo 'Executing test'"
+    }
+}
+
+def runAutomation(env) {
+    runAutomation: {
+        sh "echo 'Executing " + env+ "'"
+    }
 }
