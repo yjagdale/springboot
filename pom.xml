@@ -1,29 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>com.artbrain</groupId>
-    <artifactId>SpringBoot</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <groupId>com.veritas.admin.public</groupId>
+    <artifactId>admin-public</artifactId>
     <packaging>jar</packaging>
-
-    <name>SpringBoot</name>
-    <description>Demo project for Spring Boot</description>
-
+    <version>1.0</version>
+    <name>public-admin</name>
+    <url>http://maven.apache.org</url>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>1.3.0.RELEASE</version>
-        <relativePath/>
-        <!-- lookup parent from repository -->
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <project.artifact.name>${project.artifactId}</project.artifact.name>
+        <project.projectImageName>${project.artifact.name}-${project.version}-${build.number}</project.projectImageName>
     </properties>
 
     <dependencies>
@@ -78,7 +72,7 @@
     </dependencies>
 
     <build>
-        <finalName>${project.artifact.name}-${project.version}-${build.number}</finalName>
+        <finalName>${project.projectImageName}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -98,6 +92,46 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+            <groupId>com.spotify</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>1.1.1</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>build</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <imageName>${docker_repo_server_url}/${project.artifact.name}</imageName>
+                <imageTags>
+                    <imageTag>${build.number}</imageTag>
+                </imageTags>
+                <baseImage>java:8</baseImage>
+                <maintainer>>Yash Jagdale (jagdale0210@gmail.com)</maintainer>
+                <entryPoint>
+                    ["java", "-jar", "/opt/${project.projectImageName}.jar"]
+                </entryPoint>
+
+                <serverId>${server_id}</serverId>
+                <registryUrl>${docker_repo_server_url}</registryUrl>
+
+                <resources>        <!-- Dockerfile building resources -->
+                    <resource>
+                        <targetPath>/opt/</targetPath>
+                        <directory>${project.build.directory}</directory>
+                        <excludes>
+                            <exclude>target/**/*</exclude>
+                            <exclude>pom.xml</exclude>
+                            <exclude>*.iml</exclude>
+                        </excludes>
+                        <include>${project.projectImageName}.jar</include>
+                    </resource>
+                </resources>
+            </configuration>
+        </plugin>
         </plugins>
 
     </build>
